@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 'Output sorted summary of VIM plugin startup times in millisecs.'
 # Mark Blakeney, Jan 2018
-import os
-import sys
 import argparse
-import subprocess
-import tempfile
+import os
 import statistics
-from pathlib import Path
+import subprocess
+import sys
+import tempfile
 from collections import defaultdict
+from pathlib import Path
 
 HOME = Path.home()
 
@@ -45,10 +44,9 @@ def do_sample_run(prog, tmpfile, logfile):
     cmd = f'{prog} -Xf -V0{notaterm} --startuptime {logfile.name} '\
             f'-cqa {tmpfile.name}'
     try:
-        res = subprocess.run(cmd.split(), universal_newlines=True,
-                             stdout=subprocess.DEVNULL)
+        res = subprocess.run(cmd.split(), text=True, stdout=subprocess.DEVNULL)
     except Exception as e:
-        sys.exit(e)
+        sys.exit(str(e))
 
     if res.returncode != 0:
         sys.exit(f'.. exited with {prog} error.')
@@ -59,7 +57,7 @@ def do_sample_run(prog, tmpfile, logfile):
         if ': sourcing /' not in line:
             continue
 
-        junk, junk, tstr, junk, fname = line.split()
+        _, _, tstr, _, fname = line.split()
 
         # Only concerned with personal plugins
         try:
@@ -122,8 +120,7 @@ def main():
     # Output sorted results
     if times and not diffs:
         percent = 100. / sum(times.values())
-        for ind, plugin in enumerate(sorted(times, key=times.get,
-                reverse=True), 1):
+        for ind, plugin in enumerate(sorted(times, key=times.get, reverse=True), 1):  # type: ignore
             if args.num and ind > args.num:
                 break
 
